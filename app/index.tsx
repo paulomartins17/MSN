@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  SafeAreaView
-} from 'react-native';
-import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import * as Haptics from 'expo-haptics';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 type StatusType = 'online' | 'busy' | 'away' | 'offline';
 
@@ -40,7 +40,7 @@ export default function LoginScreen() {
   const [apiUrl, setApiUrl] = useState('http://localhost:3000');
   const [status, setStatus] = useState<StatusType>('online');
   const [showStatusPicker, setShowStatusPicker] = useState(false);
-  
+
   // Selected Avatar index
   const [avatarIndex, setAvatarIndex] = useState(0);
 
@@ -59,7 +59,7 @@ export default function LoginScreen() {
         return;
       }
     }
-    
+
     // Fallbacks
     if (Platform.OS === 'android') {
       setApiUrl('http://10.0.2.2:3000');
@@ -83,9 +83,9 @@ export default function LoginScreen() {
       alert('Por favor, informe seu nome antes de entrar.');
       return;
     }
-    
+
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    
+
     // Navigate to Chat Screen, passing name, status, api url and avatar
     router.replace({
       pathname: '/chat',
@@ -138,7 +138,7 @@ export default function LoginScreen() {
                 <View style={[styles.logoMiniFigure, { backgroundColor: '#60a5fa' }]} />
                 <View style={[styles.logoMiniFigure, { backgroundColor: '#34d399', marginLeft: 4 }]} />
               </View>
-              <Text style={styles.windowTitle}>MSN Messenger v7.0</Text>
+              <Text style={styles.windowTitle}>Girly Chat 2000</Text>
               <View style={styles.windowControls}>
                 <View style={styles.controlBtn} />
                 <View style={styles.controlBtn} />
@@ -221,8 +221,8 @@ export default function LoginScreen() {
 
                 {/* MSN Checkboxes */}
                 <View style={styles.checkboxArea}>
-                  <TouchableOpacity 
-                    style={styles.checkboxRow} 
+                  <TouchableOpacity
+                    style={styles.checkboxRow}
                     onPress={() => setRememberMe(!rememberMe)}
                   >
                     <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
@@ -231,8 +231,8 @@ export default function LoginScreen() {
                     <Text style={styles.checkboxLabel}>Lembrar-me</Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity 
-                    style={styles.checkboxRow} 
+                  <TouchableOpacity
+                    style={styles.checkboxRow}
                     onPress={() => setAutoSignIn(!autoSignIn)}
                   >
                     <View style={[styles.checkbox, autoSignIn && styles.checkboxChecked]}>

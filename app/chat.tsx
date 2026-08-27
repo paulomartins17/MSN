@@ -74,6 +74,45 @@ export default function ChatScreen() {
   const processedNudges = useRef<Set<string>>(new Set());
   const flatListRef = useRef<FlatList>(null);
 
+  // ── Register username on enter / release on leave ────────────────────────
+  useEffect(() => {
+    let mounted = true;
+
+    const join = async () => {
+      try {
+        const res = await fetch(`${apiUrl}/join`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name })
+        });
+        if (!mounted) return;
+        if (res.status === 409) {
+          const data = await res.json();
+          Alert.alert(
+            'Nome já em uso',
+            data.error || `O nome "${name}" já está sendo usado. Escolha outro apelido.`,
+            [{ text: 'OK', onPress: () => router.replace('/') }]
+          );
+        }
+      } catch (_) {
+        // Falha silenciosa — o servidor pode não ter o endpoint /join
+      }
+    };
+
+    join();
+
+    return () => {
+      mounted = false;
+      // Best-effort: libera o username ao sair
+      fetch(`${apiUrl}/leave`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name })
+      }).catch(() => {});
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Screen shake animation logic
   const triggerShakeEffect = useCallback(() => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
@@ -187,6 +226,17 @@ export default function ChatScreen() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
+
+      if (res.status === 409) {
+        const data = await res.json();
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        Alert.alert(
+          'Nome já em uso',
+          data.error || `O nome "${name}" já está sendo usado por outra pessoa.`,
+          [{ text: 'Voltar', onPress: () => router.replace('/') }]
+        );
+        return;
+      }
 
       if (!res.ok) {
         throw new Error(`Erro ${res.status}`);
@@ -353,6 +403,11 @@ export default function ChatScreen() {
   });
 
   return (
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+    >
     <SafeAreaView style={styles.safe}>
       {/* HEADER: Baby blue background, white circle avatar, "Bem-vinde FULANO" text */}
       <View style={styles.header}>
@@ -439,25 +494,21 @@ export default function ChatScreen() {
       )}
 
       {/* INPUT BAR: Digite sua mensagem... and paper plane send icon */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-      >
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.textInput}
-            value={inputText}
-            onChangeText={setInputText}
-            placeholder="Digite sua mensagem..."
-            placeholderTextColor="#94a3b8"
-            onSubmitEditing={() => handleSend()}
-            blurOnSubmit={false}
-          />
-          <TouchableOpacity style={styles.sendButton} onPress={() => handleSend()}>
-            <Ionicons name="paper-plane-outline" size={24} color="#0f172a" />
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.textInput}
+          value={inputText}
+          onChangeText={setInputText}
+          placeholder="Digite sua mensagem..."
+          placeholderTextColor="#94a3b8"
+          onSubmitEditing={() => handleSend()}
+          blurOnSubmit={false}
+          multiline={false}
+        />
+        <TouchableOpacity style={styles.sendButton} onPress={() => handleSend()}>
+          <Ionicons name="paper-plane-outline" size={24} color="#0f172a" />
+        </TouchableOpacity>
+      </View>
 
       {/* Glassmorphic Context Menu (Long Press Options) */}
       {showMenu && selectedMessage && (
@@ -498,6 +549,7 @@ export default function ChatScreen() {
         </TouchableOpacity>
       )}
     </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 
