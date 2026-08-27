@@ -54,7 +54,7 @@ export default function ChatScreen() {
 
   const getAvatarForUser = useCallback((userName: string) => {
     if (userName === name) return avatar;
-    const avatars = ['🦋', '🦆', '⚽', '🌻', '🎮', '💖', '🐱'];
+    const avatars = ['🦋', '🦆', '⚽', '🌻', '🎮', '💖', '🐱', '🏳️‍🌈', '😘', '💋', '🤡', '🤖', '👽', '👻', '💩', '🤮'];
     let hash = 0;
     for (let i = 0; i < userName.length; i++) {
       hash = userName.charCodeAt(i) + ((hash << 5) - hash);

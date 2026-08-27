@@ -27,7 +27,7 @@ const BANNED_WORDS = [
   'filhodaputa', 'filho da puta', 'arrombado', 'piranha', 'vagabunda',
   'vagabundo', 'desgraçado', 'desgraçada', 'babaca', 'corno', 'prostituta',
   'cacete', 'xoxota', 'bosta', 'otário', 'otaria', 'punheta', 'broxa',
-  'imbecil', 'sacanagem', 'rola',
+  'imbecil', 'sacanagem', 'rola', 'cu', 'cuzinho',
 ];
 
 function censorText(text) {
