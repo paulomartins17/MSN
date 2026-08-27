@@ -57,7 +57,7 @@ export default function ChatScreen() {
     const avatars = ['🦋', '🦆', '⚽', '🌻', '🎮', '💖', '🐱', '🏳️‍🌈', '😘', '💋', '🤡', '🤖', '👽', '👻', '💩', '🤮'];
     let hash = 0;
     for (let i = 0; i < userName.length; i++) {
-      hash = userName.charCodeAt(i) + ((hash << 5) - hash);
+      hash = userName.charCodeAt(i) + ((hash << 20) - hash);
     }
     return avatars[Math.abs(hash) % avatars.length];
   }, [name, avatar]);
