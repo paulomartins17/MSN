@@ -224,6 +224,56 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // ── DELETE /messages ────────────────────────────────────────────────────────
+  if (req.url === '/messages' && req.method === 'DELETE') {
+    let body = '';
+    req.on('data', chunk => { body += chunk.toString(); });
+    req.on('end', () => {
+      try {
+        const payload = JSON.parse(body || '{}');
+        if (payload.password !== '1234') {
+          jsonResponse(res, 401, { error: 'Senha incorreta.' });
+          return;
+        }
+        writeMessages([]);
+        console.log('[CLEAR] Chat limpo por operação administrativa.');
+        jsonResponse(res, 200, { ok: true, message: 'Chat limpo com sucesso!' });
+      } catch (err) {
+        jsonResponse(res, 500, { error: 'Failed to process request: ' + err.message });
+      }
+    });
+    return;
+  }
+
+  // ── GET /stickers/:filename ─────────────────────────────────────────────────
+  {
+    const stickerMatch = req.url && req.url.match(/^\/stickers\/([^/?#]+)$/);
+    if (stickerMatch && req.method === 'GET') {
+      const filename = decodeURIComponent(stickerMatch[1]);
+      const stickersDir = path.resolve(path.join(SERVER_DIR, '..', 'assets', 'stickers'));
+      const filePath = path.resolve(path.join(stickersDir, filename));
+
+      if (!filePath.startsWith(stickersDir)) {
+        jsonResponse(res, 403, { error: 'Forbidden' });
+        return;
+      }
+
+      const ext = path.extname(filename).toLowerCase();
+      const mime = { '.png': 'image/png', '.gif': 'image/gif', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg' };
+      const contentType = mime[ext] || 'application/octet-stream';
+
+      fs.readFile(filePath, (err, data) => {
+        if (err) {
+          jsonResponse(res, 404, { error: 'Sticker not found' });
+          return;
+        }
+        res.writeHead(200, { 'Content-Type': contentType, 'Cache-Control': 'public, max-age=86400' });
+        res.end(data);
+      });
+      return;
+    }
+  }
+
   // ── GET /api-docs ───────────────────────────────────────────────────────────
   if (req.url === '/api-docs' && req.method === 'GET') {
     const html = `<!DOCTYPE html>
@@ -453,6 +503,30 @@ const server = http.createServer((req, res) => {
     </div>
   </div>
 
+  <!-- DELETE /messages — Limpar Chat -->
+  <div class="card" style="border-color: rgba(248,113,113,0.4);">
+    <div class="card-header" onclick="toggle(this)">
+      <span class="badge badge-delete">DELETE</span>
+      <span class="endpoint-path">/messages</span>
+      <span class="card-desc">🗑️ Limpar todo o chat</span>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="tag-row">
+        <span class="badge badge-post">200 OK</span>
+        <span class="badge badge-delete">401 Unauthorized</span>
+        <span style="font-size:12px;color:var(--muted)">Apaga permanentemente todas as mensagens do chat.</span>
+      </div>
+      <div class="note" style="background:rgba(248,113,113,0.07);border-color:rgba(248,113,113,0.25);color:var(--red)">⚠️ Ação irreversível! Todas as mensagens serão apagadas permanentemente.</div>
+      <div>
+        <label>Senha de administrador</label>
+        <input type="password" id="clear-password" placeholder="••••" style="max-width:200px" />
+      </div>
+      <button class="btn btn-danger" onclick="clearChat()">🗑️ Limpar Todo o Chat</button>
+      <div id="res-clear" class="response-box"></div>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -499,6 +573,26 @@ const server = http.createServer((req, res) => {
       } else {
         chips.style.display = 'none';
       }
+    } catch (e) {
+      box.innerHTML = '<span class="status-err">Erro de conexão: ' + e.message + '</span>';
+    }
+  }
+
+  async function clearChat() {
+    const pwd = document.getElementById('clear-password').value;
+    if (!pwd) { alert('Digite a senha de administrador.'); return; }
+    const box = document.getElementById('res-clear');
+    box.className = 'response-box visible';
+    box.textContent = '⏳ Limpando chat...';
+    try {
+      const res = await fetch(BASE + '/messages', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pwd })
+      });
+      const data = await res.json();
+      const cls = res.ok ? 'status-ok' : 'status-err';
+      box.innerHTML = '<span class="' + cls + '">HTTP ' + res.status + ' ' + res.statusText + '</span>\\n\\n' + JSON.stringify(data, null, 2);
     } catch (e) {
       box.innerHTML = '<span class="status-err">Erro de conexão: ' + e.message + '</span>';
     }

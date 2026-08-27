@@ -11,7 +11,9 @@ import {
   Platform,
   SafeAreaView,
   Clipboard,
-  Alert
+  Alert,
+  Image,
+  ScrollView,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -32,6 +34,15 @@ interface Message {
   timestamp: string;
   ip?: string;
 }
+
+const STICKER_LIST = [
+  '47_47.png', '48_48.png', '49_49.png', '50_50.png', '51_51.png',
+  '52_52.png', '71_71.png', '72_72.png', '74_74.gif', '77_77.png',
+  'angel_smile.png', 'angry_smile.png', 'confused_smile.png', 'cry_smile.gif',
+  'devil_smile.png', 'kiss.png', 'omg_smile.png', 'red_smile.png',
+  'regular_smile.png', 'sad_smile.png', 'shades_smile.png', 'teeth_smile.png',
+  'tongue_smile.png', 'what_face.png', 'wink_smile.gif',
+];
 
 export default function ChatScreen() {
   const router = useRouter();
@@ -68,6 +79,9 @@ export default function ChatScreen() {
 
   // Quoted Reply state
   const [replyTo, setReplyTo] = useState<Message | null>(null);
+
+  // Sticker Picker state
+  const [showStickerPicker, setShowStickerPicker] = useState(false);
 
   // Screen shake animation
   const shakeOffset = useSharedValue(0);
@@ -314,6 +328,7 @@ export default function ChatScreen() {
     if (deletedLocalIds.includes(item.id)) return null;
 
     const isSystemNudge = item.text.includes('⚠️ chamou a atenção de todos!');
+    const isSticker = /^\[sticker:[^\]]+\]$/.test(item.text);
     const isCurrentUser = item.name === name;
     const showTime = showTimeIds.includes(item.id);
     const formattedTime = new Date(item.timestamp).toLocaleTimeString([], {
@@ -372,8 +387,16 @@ export default function ChatScreen() {
             </Text>
 
             {/* Bubble body (light pink/magenta) */}
-            <View style={[styles.bubble, isCurrentUser ? styles.bubbleRight : styles.bubbleLeft]}>
-              <Text style={styles.messageText}>{item.text}</Text>
+            <View style={[styles.bubble, isCurrentUser ? styles.bubbleRight : styles.bubbleLeft, isSticker && styles.stickerBubble]}>
+              {isSticker ? (
+                <Image
+                  source={{ uri: `${apiUrl}/stickers/${item.text.slice(9, -1)}` }}
+                  style={styles.stickerImage}
+                  resizeMode="contain"
+                />
+              ) : (
+                <Text style={styles.messageText}>{item.text}</Text>
+              )}
             </View>
 
             {/* Time / IP Info (appears on single tap or toggle) */}
@@ -493,8 +516,43 @@ export default function ChatScreen() {
         </View>
       )}
 
+      {/* STICKER PICKER PANEL */}
+      {showStickerPicker && (
+        <View style={styles.stickerPicker}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.stickerGrid}
+          >
+            {STICKER_LIST.map(filename => (
+              <TouchableOpacity
+                key={filename}
+                style={styles.stickerPickerItem}
+                onPress={() => {
+                  handleSend(`[sticker:${filename}]`);
+                  setShowStickerPicker(false);
+                }}
+              >
+                <Image
+                  source={{ uri: `${apiUrl}/stickers/${filename}` }}
+                  style={{ width: 52, height: 52 }}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
       {/* INPUT BAR: Digite sua mensagem... and paper plane send icon */}
       <View style={styles.inputContainer}>
+        <TouchableOpacity
+          style={styles.stickerButton}
+          onPress={() => setShowStickerPicker(v => !v)}
+          accessibilityLabel="Abrir figurinhas"
+        >
+          <Text style={{ fontSize: 22 }}>😊</Text>
+        </TouchableOpacity>
         <TextInput
           style={styles.textInput}
           value={inputText}
@@ -875,5 +933,44 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#64748b',
     fontWeight: 'bold',
+  },
+  // ── Sticker styles ──────────────────────────────────────────────────────────
+  stickerBubble: {
+    backgroundColor: 'transparent',
+    padding: 2,
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  stickerImage: {
+    width: 80,
+    height: 80,
+  },
+  stickerPicker: {
+    backgroundColor: 'white',
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+    paddingVertical: 10,
+  },
+  stickerGrid: {
+    paddingHorizontal: 12,
+    gap: 8,
+    alignItems: 'center' as const,
+  },
+  stickerPickerItem: {
+    width: 68,
+    height: 68,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    borderRadius: 10,
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  stickerButton: {
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+    marginRight: 4,
   },
 });
