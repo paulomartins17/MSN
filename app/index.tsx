@@ -31,7 +31,16 @@ const MSN_AVATARS: MsnAvatar[] = [
   { id: 'flower', emoji: '🌻', label: 'Girassol', color: '#fde047' }, // Sunflower
   { id: 'game', emoji: '🎮', label: 'Controle', color: '#c084fc' }, // Gamepad
   { id: 'heart', emoji: '💖', label: 'Coração', color: '#fda4af' }, // Pink heart
-  { id: 'cat', emoji: '🐱', label: 'Gatinho', color: '#ffedd5' } // Kitten
+  { id: 'cat', emoji: '🐱', label: 'Gatinho', color: '#ffedd5' }, // Kitten
+  { id: 'gay', emoji: '🏳️‍🌈', label: 'Gay', color: '#fda4af' }, // Gay
+  { id: 'kiss', emoji: '😘', label: 'Beijo', color: '#fda4af' }, // Kiss
+  { id: 'lips', emoji: '💋', label: 'Lábio', color: '#fda4af' }, // Lips
+  { id: 'clown', emoji: '🤡', label: 'Palhaço', color: '#fda4af' }, // Clown
+  { id: 'robot', emoji: '🤖', label: 'Robô', color: '#fda4af' }, // Robot
+  { id: 'alien', emoji: '👽', label: 'Alien', color: '#fda4af' }, // Alien
+  { id: 'ghost', emoji: '👻', label: 'Fantasma', color: '#fda4af' }, // Ghost
+  { id: 'poop', emoji: '💩', label: 'Cocô', color: '#fda4af' }, // Poop
+  { id: 'vomit', emoji: '🤮', label: 'Vômito', color: '#fda4af' }, // Vomit
 ];
 
 export default function LoginScreen() {
