@@ -328,6 +328,9 @@ export default function ChatScreen() {
     if (deletedLocalIds.includes(item.id)) return null;
 
     const isSystemNudge = item.text.includes('⚠️ chamou a atenção de todos!');
+    const isSystemJoin = item.text.startsWith('[system:join]');
+    const isSystemLeave = item.text.startsWith('[system:leave]');
+    const isSystemEvent = isSystemJoin || isSystemLeave;
     const isSticker = /^\[sticker:[^\]]+\]$/.test(item.text);
     const isCurrentUser = item.name === name;
     const showTime = showTimeIds.includes(item.id);
@@ -342,6 +345,24 @@ export default function ChatScreen() {
           <Text style={styles.nudgeMessageText}>
             ⚡ {item.name} {item.text.replace('⚠️ ', '')}
           </Text>
+        </View>
+      );
+    }
+
+    if (isSystemEvent) {
+      const icon = isSystemJoin ? '🟢' : '🔴';
+      const label = isSystemJoin
+        ? `${item.name} entrou na sala`
+        : `${item.name} saiu da sala`;
+      const eventStyle = isSystemJoin ? styles.systemJoinBanner : styles.systemLeaveBanner;
+      const textStyle = isSystemJoin ? styles.systemJoinText : styles.systemLeaveText;
+      return (
+        <View style={styles.systemEventContainer}>
+          <View style={[styles.systemEventLine, isSystemJoin ? styles.systemJoinLine : styles.systemLeaveLine]} />
+          <View style={eventStyle}>
+            <Text style={textStyle}>{icon} {label}</Text>
+          </View>
+          <View style={[styles.systemEventLine, isSystemJoin ? styles.systemJoinLine : styles.systemLeaveLine]} />
         </View>
       );
     }
@@ -738,6 +759,7 @@ const styles = StyleSheet.create({
   messageContentWrapper: {
     maxWidth: '70%',
     marginLeft: 10,
+    marginRight: 10,
   },
   senderName: {
     fontSize: 12,
@@ -751,21 +773,25 @@ const styles = StyleSheet.create({
     marginLeft: 0,
   },
   bubble: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 18,
-    elevation: 1,
+    paddingHorizontal: 15,
+    paddingVertical: 11,
+    borderRadius: 20,
+    // Glassmorphism base styling
+    borderWidth: 1.5,
     shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
   },
   bubbleLeft: {
-    backgroundColor: '#f5d6eb', // Pink/light magenta matching reference image
+    backgroundColor: 'rgba(255, 235, 247, 0.70)',
+    borderColor: 'rgba(255, 255, 255, 0.90)',
     borderTopLeftRadius: 4,
   },
   bubbleRight: {
-    backgroundColor: '#d2e5f5', // Soft MSN blue
+    backgroundColor: 'rgba(218, 238, 255, 0.70)',
+    borderColor: 'rgba(255, 255, 255, 0.90)',
     borderTopRightRadius: 4,
   },
   messageText: {
@@ -801,6 +827,50 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#fca5a5',
+  },
+  // ── System event banners (join / leave) ─────────────────────────────────────
+  systemEventContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 10,
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  systemEventLine: {
+    flex: 1,
+    height: 1,
+  },
+  systemJoinLine: {
+    backgroundColor: 'rgba(52, 211, 153, 0.4)',
+  },
+  systemLeaveLine: {
+    backgroundColor: 'rgba(251, 146, 60, 0.4)',
+  },
+  systemJoinBanner: {
+    backgroundColor: 'rgba(52, 211, 153, 0.15)',
+    borderColor: 'rgba(52, 211, 153, 0.45)',
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+  },
+  systemLeaveBanner: {
+    backgroundColor: 'rgba(251, 146, 60, 0.15)',
+    borderColor: 'rgba(251, 146, 60, 0.45)',
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+  },
+  systemJoinText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#059669',
+  },
+  systemLeaveText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#d97706',
   },
   replyPreviewBar: {
     backgroundColor: '#e2e8f0',

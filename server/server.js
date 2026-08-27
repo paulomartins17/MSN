@@ -186,6 +186,18 @@ const server = http.createServer((req, res) => {
 
         activeUsers.set(key, { name: payload.name, ip, lastSeen: Date.now() });
         console.log(`[JOIN] ${payload.name} (${ip}) entrou. Usuários ativos: ${activeUsers.size}`);
+
+        // Broadcast system event so all clients show the join banner
+        const joinMessages = readMessages();
+        joinMessages.push({
+          id: String(Date.now() + Math.random()),
+          name: payload.name,
+          text: `[system:join] ${payload.name} entrou na sala`,
+          timestamp: new Date().toISOString(),
+          system: true
+        });
+        writeMessages(joinMessages);
+
         jsonResponse(res, 200, { ok: true, message: `Bem-vinde, ${payload.name}!` });
       } catch (err) {
         jsonResponse(res, 500, { error: 'Failed to process request: ' + err.message });
@@ -205,6 +217,17 @@ const server = http.createServer((req, res) => {
         if (payload.name) {
           activeUsers.delete(normalizeUsername(payload.name));
           console.log(`[LEAVE] ${payload.name} saiu. Usuários ativos: ${activeUsers.size}`);
+
+          // Broadcast system event so all clients show the leave banner
+          const leaveMessages = readMessages();
+          leaveMessages.push({
+            id: String(Date.now() + Math.random()),
+            name: payload.name,
+            text: `[system:leave] ${payload.name} saiu da sala`,
+            timestamp: new Date().toISOString(),
+            system: true
+          });
+          writeMessages(leaveMessages);
         }
         jsonResponse(res, 200, { ok: true });
       } catch (err) {
