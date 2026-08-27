@@ -245,6 +245,14 @@ export default function ChatScreen() {
   };
 
   // Renderização otimizada com React.memo e Set
+  const toggleShowTime = useCallback((msgId: string) => {
+    setShowTimeIds(prev => {
+      const next = new Set(prev);
+      next.has(msgId) ? next.delete(msgId) : next.add(msgId);
+      return next;
+    });
+  }, []);
+
   const renderMessageItem = useCallback(({ item }: { item: Message }) => {
     if (deletedLocalIds.has(item.id)) return null;
 
@@ -279,14 +287,12 @@ export default function ChatScreen() {
       );
     }
 
-    const tap = Gesture.Tap().numberOfTaps(1).onStart(() => {
-      runOnJS(setShowTimeIds)(prev => {
-        const next = new Set(prev);
-        next.has(item.id) ? next.delete(item.id) : next.add(item.id);
-        return next;
+    const tap = Gesture.Tap()
+      .numberOfTaps(1)
+      .onStart(() => {
+        runOnJS(toggleShowTime)(item.id);
+        runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
       });
-      runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
-    });
 
     const doubleTap = Gesture.Tap().numberOfTaps(2).onStart(() => runOnJS(sendMsnNudge)());
     const longPress = Gesture.LongPress().minDuration(500).onStart(() => {
