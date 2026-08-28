@@ -49,7 +49,7 @@ export default function ChatScreen() {
   const params = useLocalSearchParams();
   const name = (params.name as string) || 'FULANO';
   const initialStatus = (params.status as string) || 'online';
-  const apiUrl = (params.apiUrl as string) || 'http://localhost:3000';
+  const apiUrl = (params.apiUrl as string) || 'https://nuclei-variably-zombie.ngrok-free.dev';
   const avatar = (params.avatar as string) || '🦋';
 
   const getAvatarForUser = useCallback((userName: string) => {
@@ -349,7 +349,7 @@ export default function ChatScreen() {
             <Ionicons name="arrow-back" size={24} color="#0f172a" />
           </TouchableOpacity>
           <View style={styles.headerAvatar}><Text style={styles.headerAvatarEmoji}>{avatar}</Text></View>
-          <Text style={styles.headerTitle} numberOfLines={1}>Bem-vinde {name}</Text>
+          <Text style={styles.headerTitle} numberOfLines={1}>Bem-vindo(a) {name}</Text>
           <View style={[styles.headerStatusDot, { backgroundColor: getStatusColor(initialStatus) }]} />
           <TouchableOpacity style={styles.nudgeButton} onPress={sendMsnNudge}>
             <Ionicons name="alert-circle" size={24} color="#0284c7" />
@@ -379,11 +379,11 @@ export default function ChatScreen() {
           ) : (
             <FlatList
               ref={flatListRef}
-              data={[...messages].reverse()}
+              data={Platform.OS === 'web' ? messages : [...messages].reverse()}
               keyExtractor={item => item.id}
               renderItem={renderMessageItem}
               contentContainerStyle={styles.listContent}
-              inverted={messages.length > 0}
+              inverted={Platform.OS !== 'web' && messages.length > 0}
               onRefresh={onRefresh}
               refreshing={refreshing}
               removeClippedSubviews={true}

@@ -71,7 +71,7 @@ export default function LoginScreen() {
 
     // Fallbacks
     if (Platform.OS === 'android') {
-      setApiUrl('http://10.0.2.2:3000');
+      setApiUrl('https://nuclei-variably-zombie.ngrok-free.dev');
     } else {
       setApiUrl('http://localhost:3000');
     }
