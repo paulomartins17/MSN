@@ -1,4 +1,4 @@
-# 🦋 MSN Messenger Chatroom v7.0 (Y2K Glassmorphism)
+# 🦋 Girly Chat
 
 Este é um aplicativo de chat móvel desenvolvido em React Native (Expo SDK 54) com uma estética Y2K baseada no clássico **MSN Messenger**, fundido com toques modernos de **Glassmorphism** (painéis translúcidos, sombras suaves, desfoques e bordas reflexivas).
 
